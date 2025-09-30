@@ -1,5 +1,5 @@
 import type { Hotel, SupplierResponse } from '../../types/index.js';
-import { supplierA_Hotels, supplierB_Hotels } from '../../suppliers/supplierMocks.js';
+import axios from "axios";
 import { ApplicationFailure } from '@temporalio/client';
 
 /**
@@ -23,14 +23,24 @@ export async function fetchHotelsBySupplier(
   const failChanceB = 0.08; // 8%  fail for Supplier B
   const shouldFail = (p: number) => Math.random() < p;
 
-  if (supplier === "Supplier A") {
+  const apiHost = process.env.API_HOST;
+  if (!apiHost) {
+    throw new Error("API_HOST environment variable is not set");
+  }
+  const baseUrl = `http://${apiHost}`;
 
+  console.log(baseUrl);
+  if (supplier === "Supplier A") {
     if (shouldFail(failChanceA)) {
-      throw new ApplicationFailure("Supplier A timed out / returned 5xx");
+      throw new ApplicationFailure("Oops! Something went wrong with the code while fetching hotels from Supplier A");
     }
 
+    const response = await axios.get(`${baseUrl}/supplierA/hotels`, {
+      params: { city },
+    });
+
     return {
-      hotels: supplierA_Hotels,
+      hotels: response.data, 
       supplier: "Supplier A",
       responseTime: Date.now() - start,
     };
@@ -38,11 +48,15 @@ export async function fetchHotelsBySupplier(
 
   if (supplier === "Supplier B") {
     if (shouldFail(failChanceB)) {  
-      throw new ApplicationFailure("Supplier B timed out / returned 5xx")
+      throw new ApplicationFailure("Oops! Something went wrong with the code while fetching hotels from Supplier B")
     }
 
+    const response = await axios.get(`${baseUrl}/supplierB/hotels`, {
+      params: { city },
+    });
+
     return {
-      hotels: supplierB_Hotels,
+      hotels: response.data,
       supplier: "Supplier B",
       responseTime: Date.now() - start,
     };

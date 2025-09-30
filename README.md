@@ -67,7 +67,8 @@ TEMPORAL_ADDRESS=host.docker.internal:7233
 TEMPORAL_NAMESPACE=default
 TEMPORAL_API_KEY=
 REDIS_HOST=redis
-
+API_PORT=3000
+API_HOST=host.docker.internal:3000
 ```
 
 ### 3. Start the Local Temporal Server
@@ -129,12 +130,3 @@ curl "http://localhost:3000/api/hotels?city=delhi\&minPrice=7000\&maxPrice=10000
 The first request will be a `Cache MISS`, triggering the workflow. Subsequent identical requests will result in a `Cache HIT`, returning data directly from Redis.
 
 ## 🌍 Environment Variables if you want to run it in production add TEMPORAL_ADDRESS, TEMPORAL_NAMESPACE, TEMPORAL_API_KEY from your Temporal Cloud account.
-
-| Variable           | Description                                  | Default Value                    |
-| ------------------ | -------------------------------------------- | -------------------------------- |
-| `NODE_ENV`         | The application environment.                 | `development`                    |
-| `TEMPORAL_ADDRESS` | The address of the Temporal server.          | `host.docker.internal:7233`      |
-| `TEMPORAL_NAMESPACE` | The Temporal namespace to operate in.        | `default`                      |
-| `TEMPORAL_API_KEY` | The API key for connecting to Temporal Cloud.  | (none)                         |
-| `REDIS_HOST`       | The hostname of the Redis service.           | `redis`                          |
-

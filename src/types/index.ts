@@ -28,4 +28,23 @@ export interface Hotel {
     cacheHit: boolean;
     processingTime: number;
   }
+
+  export interface SupplierHealth {
+    status: 'healthy' | 'unhealthy';
+    responseTime?: number;
+    error?: string;
+  }
+  
+  export interface HealthCheckResponse {
+    status: 'healthy' | 'degraded' | 'unhealthy';
+    timestamp: string;
+    services: {
+      redis: {
+        status: 'healthy' | 'unhealthy';
+        error?: string;
+      };
+      supplierA: SupplierHealth;
+      supplierB: SupplierHealth;
+    };
+  }
   
