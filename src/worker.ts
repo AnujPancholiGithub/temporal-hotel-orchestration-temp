@@ -26,7 +26,7 @@ async function run() {
 
   await redisClient.connect();
 
-  console.log(`Worker connecting to Temporal at: ${address} in namespace: ${namespace}`);
+  console.log(`Worker connecting to Temporal at: ${apiKey ? 'TLS' : 'non-TLS'} ${address} in namespace: ${namespace}`);
   const connection = await NativeConnection.connect(connectionOptions);
   
   const workflowsPath = path.resolve(__dirname, './temporal/workflows/hotelOrchestrator.js');

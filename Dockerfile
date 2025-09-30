@@ -7,21 +7,17 @@
     RUN npm run build
     
     # ---- Stage 2: Production ----
-    FROM node:20-bullseye-slim AS production
-    # Install system CA roots required by Temporal SDK over TLS
-    RUN apt-get update \
-     && apt-get install -y ca-certificates \
-     && rm -rf /var/lib/apt/lists/*
+    FROM node:20-bullseye-slim AS production    
     WORKDIR /app
     
-    # Install only production deps (smaller image, recommended)
+    # Install only prod deps
     COPY package*.json ./
     RUN npm ci --omit=dev
     
     # Copy compiled app
     COPY --from=builder /app/dist ./dist
     
-    # Expose API port only for the server image
+    # Expose API port
     EXPOSE 3000
     
     # Default to server; worker will override via compose `command`
