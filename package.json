@@ -1,0 +1,50 @@
+{
+  "name": "tripare-hotel-orchestrator",
+  "version": "1.0.0",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "rimraf dist && tsc",
+    "start": "node dist/server.js",
+    "start:server": "node dist/server.js",
+    "start:worker": "node dist/worker.js",
+    "start:prod": "npm run build && npm run start:server",
+    "dev:server": "tsx watch src/server.ts",
+    "dev:worker": "tsx watch src/worker.ts",
+    "dev": "npm run build && concurrently \"npm:dev:*\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "type": "module",
+  "dependencies": {
+    "@temporalio/activity": "^1.13.0",
+    "@temporalio/client": "^1.13.0",
+    "@temporalio/common": "^1.13.0",
+    "@temporalio/worker": "^1.13.0",
+    "@temporalio/workflow": "^1.13.0",
+    "axios": "^1.12.2",
+    "compression": "^1.8.1",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "helmet": "^8.1.0",
+    "ioredis": "^5.8.0",
+    "morgan": "^1.10.1",
+    "rimraf": "^6.0.1",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "@types/axios": "^0.9.36",
+    "@types/compression": "^1.8.1",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/ioredis": "^5.0.0",
+    "@types/morgan": "^1.9.10",
+    "@types/node": "^24.5.2",
+    "concurrently": "^9.2.1",
+    "nodemon": "^3.1.10",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.2"
+  }
+}

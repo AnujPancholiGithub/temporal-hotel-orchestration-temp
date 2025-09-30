@@ -1,0 +1,39 @@
+services:
+  api-server:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - REDIS_HOST=redis
+      - TEMPORAL_ADDRESS=host.docker.internal:7233
+      - TEMPORAL_NAMESPACE=${TEMPORAL_NAMESPACE}
+      - TEMPORAL_API_KEY=${TEMPORAL_API_KEY}
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  worker:
+    platform: linux/amd64
+    build:
+      context: .
+    command: npm run start:worker
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - REDIS_HOST=redis
+      - TEMPORAL_ADDRESS=host.docker.internal:7233
+      - TEMPORAL_NAMESPACE=${TEMPORAL_NAMESPACE}
+      - TEMPORAL_API_KEY=${TEMPORAL_API_KEY}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    platform: linux/amd64
+    restart: unless-stopped
