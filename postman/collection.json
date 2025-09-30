@@ -1,0 +1,247 @@
+{
+    "info": {
+      "name": "Hotel Orchestrator API",
+      "description": "Complete API collection for the Hotel Offer Orchestrator system. Includes endpoints for health checks, hotel search with caching, and mock supplier APIs for testing Temporal workflows.",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+      {
+        "key": "baseUrl",
+        "value": "http://localhost:3000",
+        "type": "string"
+      }
+    ],
+    "item": [
+      {
+        "name": "Health & Status",
+        "description": "Endpoints for monitoring application health and service status",
+        "item": [
+          {
+            "name": "Health Check",
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "{{baseUrl}}/health",
+                "host": ["{{baseUrl}}"],
+                "path": ["health"]
+              },
+              "description": "Check the health status of all services including Redis, Supplier A, and Supplier B. Returns HTTP 200 if all services are healthy, or HTTP 503 if any service is degraded or unhealthy."
+            },
+            "response": [
+              {
+                "name": "All Services Healthy",
+                "originalRequest": {
+                  "method": "GET",
+                  "url": {
+                    "raw": "{{baseUrl}}/health",
+                    "host": ["{{baseUrl}}"],
+                    "path": ["health"]
+                  }
+                },
+                "status": "OK",
+                "code": 200,
+                "_postman_previewlanguage": "json",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": "{\n  \"status\": \"healthy\",\n  \"timestamp\": \"2025-09-30T04:00:00.000Z\",\n  \"services\": {\n    \"redis\": {\n      \"status\": \"healthy\"\n    },\n    \"supplierA\": {\n      \"status\": \"healthy\",\n      \"responseTime\": 45\n    },\n    \"supplierB\": {\n      \"status\": \"healthy\",\n      \"responseTime\": 38\n    }\n  }\n}"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Hotel Search",
+        "description": "Main API endpoints for searching and filtering hotel offers",
+        "item": [
+          {
+            "name": "Search Hotels - Basic",
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "{{baseUrl}}/api/hotels?city=delhi",
+                "host": ["{{baseUrl}}"],
+                "path": ["api", "hotels"],
+                "query": [
+                  {
+                    "key": "city",
+                    "value": "delhi",
+                    "description": "City name to search hotels in (required)"
+                  }
+                ]
+              },
+              "description": "Search for hotels in a specific city. The system orchestrates parallel calls to multiple suppliers via Temporal workflow, deduplicates results, and selects the best price for each hotel. Results are cached in Redis for 1 hour."
+            },
+            "response": [
+              {
+                "name": "Cache MISS - First Request",
+                "originalRequest": {
+                  "method": "GET",
+                  "url": {
+                    "raw": "{{baseUrl}}/api/hotels?city=delhi",
+                    "host": ["{{baseUrl}}"],
+                    "path": ["api", "hotels"],
+                    "query": [
+                      {
+                        "key": "city",
+                        "value": "delhi"
+                      }
+                    ]
+                  }
+                },
+                "status": "OK",
+                "code": 200,
+                "_postman_previewlanguage": "json",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": "{\n  \"hotels\": [\n    {\n      \"id\": \"hotel-123\",\n      \"name\": \"Grand Hotel Delhi\",\n      \"price\": 8500,\n      \"city\": \"delhi\"\n    },\n    {\n      \"id\": \"hotel-456\",\n      \"name\": \"Luxury Inn\",\n      \"price\": 12000,\n      \"city\": \"delhi\"\n    }\n  ],\n  \"cacheHit\": false,\n  \"suppliers\": [\"supplierA\", \"supplierB\"]\n}"
+              }
+            ]
+          },
+          {
+            "name": "Search Hotels - With Price Filter",
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "{{baseUrl}}/api/hotels?city=delhi&minPrice=7000&maxPrice=10000",
+                "host": ["{{baseUrl}}"],
+                "path": ["api", "hotels"],
+                "query": [
+                  {
+                    "key": "city",
+                    "value": "delhi",
+                    "description": "City name to search hotels in (required)"
+                  },
+                  {
+                    "key": "minPrice",
+                    "value": "7000",
+                    "description": "Minimum price filter (optional)"
+                  },
+                  {
+                    "key": "maxPrice",
+                    "value": "10000",
+                    "description": "Maximum price filter (optional)"
+                  }
+                ]
+              },
+              "description": "Search for hotels with price range filtering. The minPrice and maxPrice parameters filter results after aggregation. Useful for finding hotels within a specific budget."
+            },
+            "response": [
+              {
+                "name": "Filtered Results",
+                "originalRequest": {
+                  "method": "GET",
+                  "url": {
+                    "raw": "{{baseUrl}}/api/hotels?city=delhi&minPrice=7000&maxPrice=10000",
+                    "host": ["{{baseUrl}}"],
+                    "path": ["api", "hotels"],
+                    "query": [
+                      {
+                        "key": "city",
+                        "value": "delhi"
+                      },
+                      {
+                        "key": "minPrice",
+                        "value": "7000"
+                      },
+                      {
+                        "key": "maxPrice",
+                        "value": "10000"
+                      }
+                    ]
+                  }
+                },
+                "status": "OK",
+                "code": 200,
+                "_postman_previewlanguage": "json",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": "{\n  \"hotels\": [\n    {\n      \"id\": \"hotel-123\",\n      \"name\": \"Grand Hotel Delhi\",\n      \"price\": 8500,\n      \"city\": \"delhi\"\n    }\n  ],\n  \"cacheHit\": false,\n  \"suppliers\": [\"supplierA\", \"supplierB\"]\n}"
+              }
+            ]
+          },
+          {
+            "name": "Search Hotels - Cache Test (Mumbai)",
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "{{baseUrl}}/api/hotels?city=mumbai",
+                "host": ["{{baseUrl}}"],
+                "path": ["api", "hotels"],
+                "query": [
+                  {
+                    "key": "city",
+                    "value": "mumbai",
+                    "description": "City name to search hotels in"
+                  }
+                ]
+              },
+              "description": "Run this request twice to observe Redis caching behavior:\n1. First call: Cache MISS - Triggers Temporal workflow, queries suppliers, caches result\n2. Second call: Cache HIT - Returns data directly from Redis (much faster)"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Mock Suppliers (Testing Only)",
+        "description": "Mock supplier endpoints used internally by Temporal workflows. These simulate external hotel supplier APIs.",
+        "item": [
+          {
+            "name": "Supplier A - Get Hotels",
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "{{baseUrl}}/supplierA/hotels?city=delhi",
+                "host": ["{{baseUrl}}"],
+                "path": ["supplierA", "hotels"],
+                "query": [
+                  {
+                    "key": "city",
+                    "value": "delhi",
+                    "description": "City name to get hotels for"
+                  }
+                ]
+              },
+              "description": "Mock endpoint for Supplier A. Returns a predefined list of hotels for the specified city. Used by Temporal workflow activities."
+            }
+          },
+          {
+            "name": "Supplier B - Get Hotels",
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "{{baseUrl}}/supplierB/hotels?city=delhi",
+                "host": ["{{baseUrl}}"],
+                "path": ["supplierB", "hotels"],
+                "query": [
+                  {
+                    "key": "city",
+                    "value": "delhi",
+                    "description": "City name to get hotels for"
+                  }
+                ]
+              },
+              "description": "Mock endpoint for Supplier B. Returns a predefined list of hotels for the specified city. Used by Temporal workflow activities."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  
